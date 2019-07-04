@@ -94,7 +94,10 @@ for cc in cats:
   #catbin = 'ch1_cat'
   #if cc == 0 or cc == 1: catbin = 'ch2_cat'
   data_cat.setRange("catcut",catbin+str(cc))
+  print 'var'
   var.Print()
+  print 'data_cat'
+  data_cat.Print()
 
   sig_pdf_name = 'shapeSig_signal_bin'+str(cc)
   print sig_pdf_name
@@ -114,8 +117,10 @@ for cc in cats:
   data2d = w_all.data("data_obs")
   data2d.Print()
   
-#  data = data2d.reduce(RooArgSet(RooFit.CutRange('catcut')))
+  #data = data2d.reduce(RooArgSet(RooFit.CutRange('catcut')))
   #data = data2d.reduce(RooFit.CutRange('catcut'))
+  #data = data2d.reduce("y==0")
+  #hist_data = data2d.createHistogram("xaxis","yaxis",80,1)
   data = data2d
   data.Print()
 #  sys.exit()
@@ -165,7 +170,11 @@ for cc in cats:
     var.removeRange("unblindReg_1")
     var.removeRange("unblindReg_2")
   else:
-    data.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.XErrorSize(0))
+    #data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
+    data2d.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0)) # err=0  for nentry = 0
+    #data2d.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.XErrorSize(0)) # err=1.2 for nenetry = 0
+    #data2d.plotOn(frame,RooFit.DataError(RooAbsData.Auto),RooFit.XErrorSize(0))
+    #data2d.plotOn(frame,RooFit.DataError(RooAbsData.Expected),RooFit.XErrorSize(0))
 
   #bkg_pdf.plotOn(frame,RooFit.LineColor(cNiceGreenDark), RooFit.LineStyle(kDashed), RooFit.Precision(1E-5), RooFit.Normalization(bkg_norm.getVal(), RooAbsReal.NumEvent))
   tot.plotOn(frame,RooFit.LineColor(cNiceGreenDark), RooFit.LineStyle(kDashed), RooFit.Precision(1E-5), RooFit.Normalization(totNorm, RooAbsReal.NumEvent))
@@ -173,24 +182,25 @@ for cc in cats:
   sig_pdf.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5), RooFit.Normalization(opt.snorm[intc]*opt.fsignal[intc],RooAbsReal.NumEvent))
 #  data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 
-  if not opt.unblind:
-    dataind = 2
-    blindedRegions = {}
-    blindedRegions['mGammaGamma'] = [100, 120, 130, 180]
-    blindedRegions['mjj'] = [70, 80, 140, 190]
+#  if not opt.unblind:
+#    dataind = 2
+#    blindedRegions = {}
+#    blindedRegions['mGammaGamma'] = [100, 120, 130, 180]
+#    blindedRegions['mjj'] = [70, 80, 140, 190]
+##    var.removeRange("unblindReg_1")
+##    var.removeRange("unblindReg_2")
+#    var.setRange("unblindReg_1",blindedRegions[var.GetName()][0],blindedRegions[var.GetName()][1])
+#    var.setRange("unblindReg_2",blindedRegions[var.GetName()][2],blindedRegions[var.GetName()][3])
+#    data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.CutRange("unblindReg_1"))
+#    data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.CutRange("unblindReg_2"))
+#    data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.Invisible())
 #    var.removeRange("unblindReg_1")
 #    var.removeRange("unblindReg_2")
-    var.setRange("unblindReg_1",blindedRegions[var.GetName()][0],blindedRegions[var.GetName()][1])
-    var.setRange("unblindReg_2",blindedRegions[var.GetName()][2],blindedRegions[var.GetName()][3])
-    data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.CutRange("unblindReg_1"))
-    data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.CutRange("unblindReg_2"))
-    data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.Invisible())
-    var.removeRange("unblindReg_1")
-    var.removeRange("unblindReg_2")
-  else:
-    data.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.XErrorSize(0))
+#  else:
+#    data.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.XErrorSize(0))
 
   datahist = frame.getObject(0)
+  
   #bkghist = frame.getObject(dataind+1)
   toth = frame.getObject(dataind+1)
   totbkgh = frame.getObject(dataind+2)
@@ -263,5 +273,10 @@ for cc in cats:
   DrawCMSLabels(c, '77.5')
   c.SaveAs(opt.outf+str(cc) + obs+".pdf")
   c.SaveAs(opt.outf+str(cc) + obs+".png")
+  c.SaveAs(opt.outf+str(cc) + obs+".C")
+  datahist.Write()
+  #hist_data.Write()
+  frame.Write()
+  c.Write()
 
 ofile.Close()
